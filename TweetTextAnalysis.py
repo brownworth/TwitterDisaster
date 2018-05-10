@@ -1,37 +1,59 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 from textblob import TextBlob
 import nltk
 from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 
 
-# In[2]:
+# In[3]:
 
 
 import pandas as pd
 import numpy as np
 
 
-# In[3]:
+# In[4]:
 
 
 tweet_text = pd.read_csv(r'./tweetsText.csv')
 
 
-# In[4]:
+# In[5]:
 
 
 tweet_text.columns
 
 
-# In[5]:
+# In[6]:
 
 
 tweet_text.head(10).text
+
+
+# ### Working with TfIdf - Term frequency/Inverse document frequency
+
+# In[7]:
+
+
+stopWords = set(stopwords.words('english')) | set(stopwords.words('spanish'))
+
+
+# In[8]:
+
+
+tweet_vector = TfidfVectorizer(analyzer='word',stop_words=stopWords).fit_transform(tweet_text['text'])
+
+
+# In[11]:
+
+
+tweet_vector
 
 
 # ### Tweet Language:
@@ -70,10 +92,10 @@ def getLang(text_sample):
 
 # There seems to be a timeout issue when processing large amounts of tweets. May be caused by API limits? Testing with increasing numbers here.
 
-# In[102]:
+# In[104]:
 
 
-tweet_lang = tweet_text[:1000].apply(lambda x: getLang(x['text']),axis=1)
+tweet_lang = tweet_text[:10000].apply(lambda x: getLang(x['text']),axis=1)
 
 
 # Language processing seems to be inconsistent.
