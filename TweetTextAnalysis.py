@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 from textblob import TextBlob
@@ -11,26 +11,26 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-# In[3]:
+# In[2]:
 
 
 import pandas as pd
 import numpy as np
 
 
-# In[4]:
+# In[3]:
 
 
 tweet_text = pd.read_csv(r'./tweetsText.csv')
 
 
-# In[5]:
+# In[4]:
 
 
 tweet_text.columns
 
 
-# In[6]:
+# In[5]:
 
 
 tweet_text.head(10).text
@@ -38,41 +38,60 @@ tweet_text.head(10).text
 
 # ### Working with TfIdf - Term frequency/Inverse document frequency
 
-# In[7]:
+# In[6]:
 
 
 stopWords = set(stopwords.words('english')) | set(stopwords.words('spanish'))
 
 
-# In[8]:
+# In[7]:
 
 
 tweet_vector = TfidfVectorizer(analyzer='word',stop_words=stopWords).fit_transform(tweet_text['text'])
 
 
-# In[11]:
+# In[8]:
 
 
 tweet_vector
+
+
+# In[9]:
+
+
+tweet_vector[0:10000].toarray()
+
+
+# In[ ]:
+
+
+from sklearn.metrics.pairwise import linear_kernel
+cosine_similarities = linear_kernel(tweet_vector[0:5], tweet_vector).flatten()
+
+
+# In[ ]:
+
+
+cosine_similarities.argsort()
 
 
 # ### Tweet Language:
 
 # TextBlob will determine the language of text, but requires that the analyzed text be at least 3 characters. For example, tweet below is causing an error.
 
-# In[65]:
+# In[ ]:
 
 
 len(tweet_text.iloc[756,1])
 
 
-# In[69]:
+# In[ ]:
 
 
 tweet_text.head(31).apply(lambda x: TextBlob(x['text']).detect_language(),axis=1)
 
 
-# In[68]:
+# In[ ]:
 
 
 tweet_text.iloc[30]
@@ -80,7 +99,7 @@ tweet_text.iloc[30]
 
 # defining a function to preserve the short tweets, and avoid the error due to string length.
 
-# In[75]:
+# In[ ]:
 
 
 def getLang(text_sample):
@@ -92,7 +111,7 @@ def getLang(text_sample):
 
 # There seems to be a timeout issue when processing large amounts of tweets. May be caused by API limits? Testing with increasing numbers here.
 
-# In[104]:
+# In[ ]:
 
 
 tweet_lang = tweet_text[:10000].apply(lambda x: getLang(x['text']),axis=1)
@@ -100,43 +119,43 @@ tweet_lang = tweet_text[:10000].apply(lambda x: getLang(x['text']),axis=1)
 
 # Language processing seems to be inconsistent.
 
-# In[103]:
+# In[ ]:
 
 
 tweet_lang.groupby(tweet_lang).count()
 
 
-# In[98]:
+# In[ ]:
 
 
 tweet_words = tweet_text.text.str.lower().str.split(r'\s+',expand=True).stack().value_counts()
 
 
-# In[6]:
+# In[ ]:
 
 
 stop_words = set(stopwords.words('english')) | set(stopwords.words('spanish'))
 
 
-# In[8]:
+# In[ ]:
 
 
 stop_list = list(stop_words)
 
 
-# In[99]:
+# In[ ]:
 
 
 tweet_words[tweet_words.index.str.len() > 3][:200]
 
 
-# In[31]:
+# In[ ]:
 
 
 tweet_words[~(tweet_words.index.isin(stop_list))].head(20)
 
 
-# In[34]:
+# In[ ]:
 
 
 tweet_words[~(tweet_words.index.isin(stop_list)) & (tweet_words.index.str.len() > 3)].head(20)
@@ -144,13 +163,13 @@ tweet_words[~(tweet_words.index.isin(stop_list)) & (tweet_words.index.str.len() 
 
 # #### Twitter Sentiment Analysis Testing
 
-# In[10]:
+# In[ ]:
 
 
 tweet_text.head(10).apply(lambda x: TextBlob(x['text']).sentiment.polarity,axis=1)
 
 
-# In[11]:
+# In[ ]:
 
 
 tweet_text.head(10).apply(lambda x: TextBlob(x['text']).sentiment.subjectivity,axis=1)
@@ -160,7 +179,7 @@ tweet_text.head(10).apply(lambda x: TextBlob(x['text']).sentiment.subjectivity,a
 
 # Twitter Corpus has some extraneous quotation marks that affect parsing.
 
-# In[12]:
+# In[ ]:
 
 
 # import re
@@ -182,13 +201,13 @@ tweet_text.head(10).apply(lambda x: TextBlob(x['text']).sentiment.subjectivity,a
 # g.close()
 
 
-# In[13]:
+# In[ ]:
 
 
 twitter_corpus = pd.read_csv(r'./sentiment_corrected.csv')
 
 
-# In[14]:
+# In[ ]:
 
 
 twitter_corpus.head()
@@ -196,7 +215,7 @@ twitter_corpus.head()
 
 # Corpus text is in alphabetical order. Using this to experiment with 60/20/20 split for train/test/val
 
-# In[15]:
+# In[ ]:
 
 
 train_sample = np.split(twitter_corpus.sample(frac=1),[int(.6*len(twitter_corpus)),int(.8*len(twitter_corpus))])
