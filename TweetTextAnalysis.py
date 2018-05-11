@@ -125,30 +125,36 @@ tweet_text['Lang'] = tweet_text[:10].apply(lambda x: getLang(x['text']),axis=1)
 
 # Trying to circumvent the API limitations with an iterator. (Using the `stop_point` variable to check on progress, and start over later.)
 
-# In[87]:
+# In[95]:
 
 
-tweet_text.iloc[14312]
+tweet_text.to_csv(r'./tweets_with_lang.csv')
 
 
 # In[ ]:
 
 
-stop_point = 14312
+stop_point = 36605
 for i in range(stop_point,tweet_text.shape[0]):
     tweet_text.iloc[i,2] = getLang(tweet_text.iloc[i,1])
 
 
-# In[ ]:
+# In[96]:
 
 
-tweet_text[tweet_text['Lang'].notnull()][-1]
+tweet_text[tweet_text['Lang'].notnull()].iloc[-1]
 
 
-# In[84]:
+# In[94]:
 
 
-tweet_text[tweet_text['Lang'].notnull()].groupby(tweet_text['Lang']).count()
+tweet_text.iloc[36605]
+
+
+# In[91]:
+
+
+tweet_text[tweet_text['Lang'].notnull()]['Lang'].groupby(tweet_text['Lang']).count()
 
 
 # Language processing seems to be inconsistent.
