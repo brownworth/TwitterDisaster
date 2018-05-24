@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 from textblob import TextBlob
@@ -11,65 +11,71 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-# In[2]:
+# In[3]:
 
 
 import pandas as pd
 import numpy as np
 
 
-# In[3]:
+# In[4]:
 
 
 tweet_text = pd.read_csv(r'./tweetsText.csv')
 
 
-# In[4]:
+# In[5]:
 
 
 tweet_text.columns
 
 
-# In[5]:
+# In[6]:
 
 
 tweet_text.head(10).text
 
 
+# In[13]:
+
+
+tweet_text.info()
+
+
 # ### Working with TfIdf - Term frequency/Inverse document frequency
 
-# In[6]:
+# In[8]:
 
 
 stopWords = set(stopwords.words('english')) | set(stopwords.words('spanish'))
 
 
-# In[7]:
+# In[9]:
 
 
 tweet_vector = TfidfVectorizer(analyzer='word',stop_words=stopWords).fit_transform(tweet_text['text'])
 
 
-# In[8]:
+# In[10]:
 
 
 tweet_vector
 
 
-# In[9]:
+# In[11]:
 
 
 tweet_vector[0:10000].toarray()
 
 
-# In[ ]:
+# In[14]:
 
 
 from sklearn.metrics.pairwise import linear_kernel
 cosine_similarities = linear_kernel(tweet_vector[0:5], tweet_vector).flatten()
 
 
-# In[ ]:
+# In[15]:
 
 
 cosine_similarities.argsort()
@@ -79,19 +85,19 @@ cosine_similarities.argsort()
 
 # TextBlob will determine the language of text, but requires that the analyzed text be at least 3 characters. For example, tweet below is causing an error.
 
-# In[ ]:
+# In[16]:
 
 
 len(tweet_text.iloc[756,1])
 
 
-# In[ ]:
+# In[17]:
 
 
 tweet_text.head(31).apply(lambda x: TextBlob(x['text']).detect_language(),axis=1)
 
 
-# In[ ]:
+# In[18]:
 
 
 tweet_text.iloc[30]
@@ -99,7 +105,7 @@ tweet_text.iloc[30]
 
 # defining a function to preserve the short tweets, and avoid the error due to string length.
 
-# In[ ]:
+# In[19]:
 
 
 def getLang(text_sample):
@@ -114,7 +120,41 @@ def getLang(text_sample):
 # In[ ]:
 
 
-tweet_lang = tweet_text[:10000].apply(lambda x: getLang(x['text']),axis=1)
+tweet_text['Lang'] = tweet_text[:10].apply(lambda x: getLang(x['text']),axis=1)
+
+
+# Trying to circumvent the API limitations with an iterator. (Using the `stop_point` variable to check on progress, and start over later.)
+
+# In[95]:
+
+
+tweet_text.to_csv(r'./tweets_with_lang.csv')
+
+
+# In[ ]:
+
+
+stop_point = 36605
+for i in range(stop_point,tweet_text.shape[0]):
+    tweet_text.iloc[i,2] = getLang(tweet_text.iloc[i,1])
+
+
+# In[96]:
+
+
+tweet_text[tweet_text['Lang'].notnull()].iloc[-1]
+
+
+# In[94]:
+
+
+tweet_text.iloc[36605]
+
+
+# In[91]:
+
+
+tweet_text[tweet_text['Lang'].notnull()]['Lang'].groupby(tweet_text['Lang']).count()
 
 
 # Language processing seems to be inconsistent.
